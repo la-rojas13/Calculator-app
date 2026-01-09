@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const debugValue = "break-lint";
+
 export const metadata: Metadata = {
   title: "Calculator App",
   description: "Simple calculator testing app",
