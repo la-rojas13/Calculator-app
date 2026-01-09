@@ -1,65 +1,164 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { calculate } from "@/app/utils/calculatorFunctions";
 
 export default function Home() {
+  const [display, setDisplay] = useState("");
+  const [currentNumber, setCurrentNumber] = useState("");
+  const [previousNumber, setPreviousNumber] = useState<number | null>(null);
+  const [operator, setOperator] = useState<string | null>(null);
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const numbers = ["7", "8", "9", "4", "5", "6", "1", "2", "3", "0"];
+  const operators = ["+", "-", "*", "/"];
+
+  const focusInput = () => {
+    inputRef.current?.focus();
+  };
+
+  const handleNumberClick = (num: string) => {
+    setCurrentNumber((prev) => prev + num);
+    setDisplay((prev) => prev + num);
+    focusInput();
+  };
+
+  const handleOperatorClick = (op: string) => {
+    if (currentNumber === "") return;
+
+    if (previousNumber === null) {
+      setPreviousNumber(parseFloat(currentNumber));
+    } else if (operator) {
+      const result = calculate(
+        previousNumber,
+        parseFloat(currentNumber),
+        operator
+      );
+      setPreviousNumber(result);
+      setDisplay(result.toString());
+    }
+
+    setOperator(op);
+    setCurrentNumber("");
+    setDisplay((prev) => prev + op);
+    focusInput();
+  };
+
+  const handleEquals = () => {
+    if (operator && previousNumber !== null && currentNumber !== "") {
+      const result = calculate(
+        previousNumber,
+        parseFloat(currentNumber),
+        operator
+      );
+      setDisplay(result.toString());
+      setPreviousNumber(null);
+      setOperator(null);
+      setCurrentNumber(result.toString());
+    }
+    focusInput();
+  };
+
+  const handleReset = () => {
+    setDisplay("");
+    setCurrentNumber("");
+    setPreviousNumber(null);
+    setOperator(null);
+    focusInput();
+  };
+
+  const handleDelete = () => {
+    setDisplay((prev) => prev.slice(0, -1));
+    setCurrentNumber((prev) => prev.slice(0, -1));
+    focusInput();
+  };
+
+  // Keyboard input
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const key = e.key;
+
+      if (numbers.includes(key)) {
+        handleNumberClick(key);
+      } else if (operators.includes(key)) {
+        handleOperatorClick(key);
+      } else if (key === "Enter" || key === "=") {
+        handleEquals();
+      } else if (key === "Backspace") {
+        handleDelete();
+      } else if (key.toLowerCase() === "c") {
+        handleReset();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentNumber, previousNumber, operator]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="flex min-h-screen items-center justify-center bg-gray-200">
+      <div className="calculator-body w-72 bg-gray-100 rounded-xl shadow-lg p-4">
+        {/* Display */}
+        <input
+          ref={inputRef}
+          type="text"
+          readOnly
+          value={display}
+          className="mb-4 w-full p-2 text-right  rounded-lg bg-white text-lg"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        {/* Reset Buttons */}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <button
+            onClick={handleReset}
+            className="p-2 bg-red-500 text-white rounded shadow font-semibold hover:bg-red-600"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            AC
+          </button>
+          <button
+            onClick={handleDelete}
+            className="p-2 bg-yellow-500 text-white rounded shadow font-semibold hover:bg-yellow-600"
           >
-            Documentation
-          </a>
+            C
+          </button>
+          <button
+            onClick={handleEquals}
+            className="p-2 bg-green-500 text-white rounded shadow font-semibold hover:bg-green-600"
+          >
+            =
+          </button>
         </div>
-      </main>
-    </div>
+
+        {/* Numbers + Operators */}
+        <div className="grid grid-cols-4 gap-2">
+          {/* Numbers */}
+          <div className="col-span-3 grid grid-cols-3 gap-2">
+            {numbers.map((num) => (
+              <button
+                key={num}
+                className="p-4 bg-white rounded-lg shadow text-lg font-medium hover:bg-gray-200"
+                onClick={() => handleNumberClick(num)}
+              >
+                {num}
+              </button>
+            ))}
+          </div>
+
+          {/* Operators */}
+          <div className="flex flex-col gap-2">
+            {operators.map((op) => (
+              <button
+                key={op}
+                className="operator-btn p-4 shadow text-lg font-medium hover:bg-blue-600"
+                onClick={() => handleOperatorClick(op)}
+              >
+                {op}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
