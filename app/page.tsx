@@ -101,6 +101,7 @@ export default function Home() {
       <div className="calculator-body w-72 bg-gray-100 rounded-xl shadow-lg p-4">
         {/* Display */}
         <input
+        id="result"
           ref={inputRef}
           type="text"
           readOnly
@@ -111,18 +112,21 @@ export default function Home() {
         {/* Reset Buttons */}
         <div className="grid grid-cols-3 gap-2 mb-4">
           <button
+           data-testid={"AC"}
             onClick={handleReset}
             className="p-2 bg-red-500 text-white rounded shadow font-semibold hover:bg-red-600"
           >
             AC
           </button>
           <button
+           data-testid={"C"}
             onClick={handleDelete}
             className="p-2 bg-yellow-500 text-white rounded shadow font-semibold hover:bg-yellow-600"
           >
             C
           </button>
           <button
+           data-testid={"="}
             onClick={handleEquals}
             className="p-2 bg-green-500 text-white rounded shadow font-semibold hover:bg-green-600"
           >
@@ -136,6 +140,7 @@ export default function Home() {
           <div className="col-span-3 grid grid-cols-3 gap-2">
             {numbers.map((num) => (
               <button
+              data-testid={num}
                 key={num}
                 className="p-4 bg-white rounded-lg shadow text-lg font-medium hover:bg-gray-200"
                 onClick={() => handleNumberClick(num)}
@@ -149,6 +154,7 @@ export default function Home() {
           <div className="flex flex-col gap-2">
             {operators.map((op) => (
               <button
+               data-testid={op}
                 key={op}
                 className="operator-btn p-4 shadow text-lg font-medium hover:bg-blue-600"
                 onClick={() => handleOperatorClick(op)}
